@@ -58,7 +58,7 @@ namespace NetworkSimulator
         //Анализ имитационной сети
         public void Analysis(out double AverageRT)
         {
-            Console.WriteLine("E(tau) = {0:f4}", (Nodes[0] as SourceNode).ResponseTimes.Average());
+            Console.WriteLine("\nE(tau) = {0:f4}", (Nodes[0] as SourceNode).ResponseTimes.Average());
             double tau = (Nodes[0] as SourceNode).ResponseTimes.Average();
             AverageRT = tau;
             var rt = (Nodes[0] as SourceNode).ResponseTimes;

@@ -129,7 +129,7 @@ namespace NetworkDescriptions
         public override string ToString()
         {
             StringBuilder str = new StringBuilder(string.Empty);
-            str.AppendLine("Параметра сети");
+            str.AppendLine("Параметры сети");
 
             str.AppendLine("B = ");
             for (int i = 0; i < B.Length; i++)

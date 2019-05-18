@@ -15,6 +15,7 @@ namespace NetworkSimulator
         {
             ID = id;
             ServiceNodes = new List<ServiceNode>();
+            NextEventTime = double.PositiveInfinity;
         }
 
         //Добавляет узел к балансировщику
@@ -42,7 +43,7 @@ namespace NetworkSimulator
 
         public override void Activate()
         {
-            PassNode().Activate();
+            //PassNode().Activate();
         }
 
         public override void Receive(Fragment fragment)

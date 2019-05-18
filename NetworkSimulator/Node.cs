@@ -14,7 +14,7 @@ namespace NetworkSimulator
         public Random random;
 
         //Узлы с которыми происходит обмен фрагментами
-        public Node[] Nodes { get; protected set; }
+        public Node[] Nodes { get; set; }
 
         //Информационный узел
         public InfoNode Info { get; protected set; }

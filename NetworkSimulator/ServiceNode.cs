@@ -7,22 +7,16 @@ using RandomVariables;
 
 namespace NetworkSimulator
 {
-    /// <summary>
-    /// Метка требования, находящегося на обслуживании (на приборе)
-    /// </summary>
+    // Метка требования, находящегося на обслуживании (на приборе)
     public class Label : IComparable<Label>
     {
-        /// <summary>
-        /// Время ухода фрагмента
-        /// </summary>
+        // Время ухода фрагмента
         public double TimeLeave
         {
             get;
             set;
         }
-        /// <summary>
-        /// Идентификатор метки
-        /// </summary>
+        // Идентификатор метки
         public long ID
         {
             get;
@@ -49,62 +43,59 @@ namespace NetworkSimulator
         }
     }
 
-    /// <summary>
-    /// Базовая система
-    /// </summary>
+    // Базовая система
     public class ServiceNode : Node
     {
-        /// <summary>
-        /// Матрица для маршрутизации фрагментов
-        ///Элемент матрицы i,j задает вероятность для i-фрагмента поступить в j узел
-        /// </summary>
-        protected double[,,] RouteMatrix
+        // Класс переход фрагмента из данного узла
+        // в узел RouteNode со смней типа фрагмента с ArrivalKind на тип LeaveKind 
+        private class RoutingRule
         {
-            get;
-            set;
+            // Текущий тип фрагмента
+            public int ArrivalKind { get; set; }
+            // Тип, которым фрагмент покинет узел
+            public int LeaveKind { get; set; }
+            // Номер узла, в который перейдёт фрагмент
+            public int RouteNode { get; set; }
+
+            public RoutingRule(int ArrivalKind, int LeaveKind, int RouteNode)
+            {
+                this.ArrivalKind = ArrivalKind;
+                this.LeaveKind = LeaveKind;
+                this.RouteNode = RouteNode; 
+            }
         }
 
-        /// <summary>
-        /// Число базовых систем
-        /// </summary>
-        public int S
-        {
-            get;
-            private set;
-        }
+        // Правила маршрутизации
+        private List<RoutingRule> RoutingRules { get; set; }
 
-        /// <summary>
-        /// Очередь базовой системы
-        /// </summary>
+        // Добавление правил
+        public void AddRule(int ArrivalKind, int LeaveKind, int RouteNode)
+        {
+            RoutingRules.Add(new RoutingRule(ArrivalKind, LeaveKind, RouteNode)); 
+        }
+        // Очередь базовой системы
         protected Buffer InBuffer
         {
             get;
             set;
         }
-        /// <summary>
-        /// Число одинаковых обслуживающих приборов
-        /// </summary>
+        // Число одинаковых обслуживающих приборов
         public int Kappa
         {
             get;
             private set;
         }
-        /// <summary>
-        /// Случайная величина - длительность обслуживания фрагмента на приборе
-        /// </summary>
+        // Случайная величина - длительность обслуживания фрагмента на приборе
         protected RandomVariable ServiceTime
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// Возвращает число фрагментов в базовой системе (очередь + приборы) 
-        /// </summary>
-        /// <returns></returns>
+        // Возвращает число фрагментов в базовой системе (очередь + приборы) 
         public int NumberOfFragments()
         {
-            return ListOfFragments.Count + InBuffer.Count();
+            return ServercingFragments.Count + InBuffer.Count();
         }
 
 
@@ -121,24 +112,19 @@ namespace NetworkSimulator
             set;
         }
 
-        /// <summary>
-        /// Время предыдущего события
-        /// </summary>
+        // Время предыдущего события
         private double PredEventTime
         {
             get;
             set;
         }
-        ///////////
 
-        /// <summary>
-        /// Обновляет время активации узла 
-        /// </summary>
+        // Обновляет время активации узла 
         protected void UpdateActionTime()
         {
-            if (ListOfFragments.Count > 0)
+            if (ServercingFragments.Count > 0)
             {
-                NextEventTime = ListOfFragments.Keys.Min().TimeLeave;
+                NextEventTime = ServercingFragments.Keys.Min().TimeLeave;
             }
             else
             {
@@ -146,35 +132,25 @@ namespace NetworkSimulator
             }
         }
 
-        /// <summary>
-        /// Упорядоченный список номеров приборов согласно времени возникновения в них событий 
-        /// Нулевой элемент списка - прибор которому нужно передать упралвение, 
-        /// если в списке нет элементов, значит нет загруженных приборов - время акивациии неизвестно 
-        /// </summary>
-        protected SortedDictionary<Label, Fragment> ListOfFragments
+        // Упорядоченный список отображающий фрагменты находящиеся на приборах  
+        // Нулевой элемент списка - фрагмент который следующим покинет систему, 
+        // если в списке нет элементов, 
+        // значит нет загруженных приборов - время акивациии неизвестно 
+        protected SortedDictionary<Label, Fragment> ServercingFragments
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// Базовая система
-        /// </summary>
-        /// <param name="r">Генратор случайных чисел</param>
-        /// <param name="InBuffer">Буффер для фргаментов</param>
-        /// <param name="kappa">Число однотипных обслуживающих приборов</param>
-        /// <param name="ServiceTime">Случайная величина - длительность обслуживания фрагмента прибором</param>
-        /// <param name="RouteMatrix">Матрица маршрутная 
-        /// Элемент i,j задает вероятность для i фрагмента попасть в j узел</param>
-        /// <param name="Nodes">Узлы</param>
-        /// <param name="Info">Информационный узел</param>
-        public ServiceNode(int ID, Random r, RandomVariable ServiceTime, Buffer InBuffer, int kappa, Node[] Nodes, InfoNode Info, double[,,] RouteMatrix)
+
+        // Конструктор - Базовая система
+        public ServiceNode(int ID, Random r, RandomVariable ServiceTime,
+            Buffer InBuffer, int kappa, Node[] Nodes, InfoNode Info)
         {
             //Копирование параметров
             this.ID = ID;
             random = r;
             this.ServiceTime = ServiceTime;
-            this.RouteMatrix = RouteMatrix;
             this.Nodes = Nodes;
             this.Info = Info;
             this.InBuffer = InBuffer;
@@ -184,11 +160,11 @@ namespace NetworkSimulator
             this.NextEventTime = Double.PositiveInfinity;
 
             //Создаем список фаргментов на приборах
-            ListOfFragments = new SortedDictionary<Label, Fragment>();
+            ServercingFragments = new SortedDictionary<Label, Fragment>();
             //Число поступивших фрагментов
             NumberOfArrivedDemands = 0;
 
-
+            RoutingRules = new List<RoutingRule>();
 
             //Для статистики 
             this.StateProbabilities = new double[MaxNumber];
@@ -196,43 +172,37 @@ namespace NetworkSimulator
             this.PredEventTime = 0;
         }
 
-        /// <summary>
-        /// Проверка существования свобдного прибора
-        /// </summary>
-        /// <returns></returns>
+        // Проверка существования свобдного прибора
         protected bool ExistFreeServer()
         {
-            return (Kappa > ListOfFragments.Count());
+            return (Kappa > ServercingFragments.Count());
         }
 
-
-        /// <summary>
-        /// Берет фрагмент из очереди и начинает его обслуживание
-        /// </summary>
+        // Берет фрагмент из очереди и начинает его обслуживание
         protected void StartService()
         {
             //Берем фрагмент из очереди 
             var new_f = InBuffer.Take();
-            //Направляем этот фрагмент на свободный обслуживающий прибор, определив время обслуживания
+            //Направляем этот фрагмент на свободный обслуживающий прибор,
+            //определив время обслуживания
             new_f.TimeStartService = Info.GetCurrentTime();
             new_f.TimeLeave = new_f.TimeStartService + ServiceTime.NextValue();
             //Увеличиваем число поступивших на прибор требований
             NumberOfArrivedDemands++;
             //Добавление фрагмента на прибор
-            ListOfFragments.Add(new Label(new_f.TimeLeave, NumberOfArrivedDemands), new_f);
+            ServercingFragments.Add(new Label(new_f.TimeLeave,
+                NumberOfArrivedDemands), new_f);
 
             UpdateActionTime();
         }
 
-
-        /// <summary>
-        /// Процедура получения фрагмента базовой системой
-        /// Фрагмент ставится в очередь или сразу начинается его обслуживание 
-        /// Реализация сегмента поступления фрагмента
-        /// </summary>
-        /// <param name="fragmetn">Получаемый фрагмент</param>
-        public override void Receive(Fragment fragmetn)
+        // Процедура получения фрагмента базовой системой
+        // Фрагмент ставится в очередь или сразу начинается его обслуживание 
+        // Реализация сегмента поступления фрагмента
+        public override void Receive(Fragment fragment)
         {
+            Console.WriteLine("Current time = {0:f4}", Info.GetCurrentTime()); 
+            Console.WriteLine("Demand with id = {0} was received", fragment.ID);
             //Для статистики - Фрагмент застает систему в некотором состоянии
             if (NumberOfFragments() < MaxNumber)
             {
@@ -246,26 +216,21 @@ namespace NetworkSimulator
 
             }
 
-
-
             //Увеличение числа поступивших фрагментов
             NumberOfArrivedDemands++;
             //Устанавливаем для фрагмента текущее время
-            fragmetn.TimeArrivale = Info.GetCurrentTime();
+            fragment.TimeArrivale = Info.GetCurrentTime();
             //Плмещаем фрагмент в очередь
-            this.InBuffer.Put(fragmetn);
+            this.InBuffer.Put(fragment);
             //Если существует свободный сервер то можно начать обслуживание
             if (ExistFreeServer())
             {
                 StartService();
             }
-
         }
 
-        /// <summary>
-        /// Направляет фрагмент в какой-либо узел согласно установленным правилам маршрутизации
-        /// </summary>
-        /// <param name="fragment">Фрагмент для передачи</param>
+        // Направляет фрагмент в какой-либо узел согласно 
+        // установленным правилам маршрутизации
         public override void Route(Fragment fragment)
         {
             //Для статистики 
@@ -279,52 +244,32 @@ namespace NetworkSimulator
 
             }
 
-
-
-            double rand = random.NextDouble();
-            double p = 0;
-            int k = fragment.Sigma.ForkNodeID;
-
-            for (int i = 0; i < RouteMatrix.GetLength(1); i++)
+            foreach (var rule in RoutingRules)
             {
-                for (int j = 0; j < RouteMatrix.GetLength(2); j++)
+                if (rule.ArrivalKind == fragment.Kind)
                 {
-                    p += RouteMatrix[k, i, j];
-                    if (rand < p)
-                    {
-                        //Посылаем фрагмент в указанный узел
-                        if (Nodes[i] == this)
-                        {
-                            Console.WriteLine("Петля");
-                        }
-                        Send(fragment, Nodes[i]);
-                        break;
-                    }
+                    fragment.Kind = rule.LeaveKind;
+                    Send(fragment, Nodes[rule.RouteNode]);
                 }
             }
         }
 
-        /// <summary>
-        /// Посылает фрагмент в указанный узел
-        /// </summary>
-        /// <param name="fragment">Посылаемый фрагмент</param>
-        /// <param name="node">Узел для отправки</param>
+        // Посылает фрагмент в указанный узел
         public override void Send(Fragment fragment, Node node)
         {
             //Посылаем фрагмент
             node.Receive(fragment);
         }
 
-        /// <summary>
-        /// Передача управления базовой системе
-        /// </summary>
+
+        // Передача управления базовой системе
         public override void Activate()
         {
             //Единственное действие это окончание обслуживания
-            var key = ListOfFragments.Keys.Min();
-            var value = ListOfFragments[key];
+            var key = ServercingFragments.Keys.Min();
+            var value = ServercingFragments[key];
             //Удаляем из списка обслуживаемых фрамгентов
-            ListOfFragments.Remove(key);
+            ServercingFragments.Remove(key);
             //Прибор свободен, пытаемся взять на обслуживание новый фрагмент 
             if (InBuffer.Count() > 0)
             {

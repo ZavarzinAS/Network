@@ -4,15 +4,19 @@
     public class Fragment : Demand
     {
         //Сигнатура фрагмента
-        public SignatureForFragment Sigma { get; set; }
+        public Fragment ParentFragment { get; set; }
 
-        public Fragment(double TimeGeneration, long ID, SignatureForFragment Sigma)
+        public int Kind { get; set; }
+
+
+
+        public Fragment(double TimeGeneration, long ID, Fragment ParentFragment, int Kind)
         {
             this.TimeGeneration = TimeGeneration;
             this.ID = ID;
-            this.Sigma = Sigma;
+            this.Kind = Kind;
+            this.ParentFragment = ParentFragment;
             NumberOfParts = 1;
-
         }
 
         //Число частей на которое был поделен фрагмент
@@ -25,5 +29,11 @@
         public double TimeLeave { get; set; }
         //Общее время пребывания в сети
         public double TotalTime { get; set; }
+
+        public override string ToString()
+        {
+            string s = string.Format("ID = {0}, TimeGen = {1:f4}, Kind = {2}", ID, TimeGeneration, Kind);
+            return s;
+        }
     }
 }

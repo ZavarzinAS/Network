@@ -10,77 +10,49 @@ namespace NetworkSimulator
 {
     public class SourceNode : Node
     {
-        /// <summary>
-        /// Среднее время отклика
-        /// </summary>
+        // Среднее время отклика
         public List<double> ResponseTimes
         {
             get;
             private set;
         }
 
-        /// <summary>
-        /// Получение требования (возврат требования в исчтоник) 
-        /// </summary>
-        /// <param name="fragment"></param>
+        // Получение требования (возврат требования в исчтоник) 
         public override void Receive(Fragment fragment)
         {
-            //Console.WriteLine("Требование вернулось");
+            Console.WriteLine("Request returned to source!");
             ResponseTimes.Add(Info.GetCurrentTime() - fragment.TimeGeneration);
         }
 
-        /// <summary>
-        /// Отправяляет требование из источника по сети 
-        /// </summary>
-        /// <param name="fragment"></param>
+        // Отправяление требования из источника по сети 
         public override void Route(Fragment fragment)
         {
-            double rand = random.NextDouble();
-            double p = 0;
-            for (int j = 0; j < RouteRow.GetLength(0); j++)
-            {
-                for (int k = 0; k < RouteRow.GetLength(1); k++)
-                {
-                    p += RouteRow[j, k];
-                    if (rand < p)
-                    {
-                        //Посылаем фрагмент в указанный узел
-                        Send(fragment, Nodes[j]);
-                        break;
-                    }
-                }
-            }
+            Console.WriteLine("Current time = {0:f4}", Info.GetCurrentTime());
+            Console.WriteLine("Send the demand at node");
+            Send(fragment, Nodes[0]);
         }
 
-        /// <summary>
-        /// Отправление требования от источника к другому узлу
-        /// </summary>
-        /// <param name="fragmetn">Требование</param>
-        /// <param name="node">Узел-получатель</param>
-        public override void Send(Fragment fragmetn, Node node)
+        // Отправление требования от источника к другому узлу
+        public override void Send(Fragment fragment, Node node)
         {
-            node.Receive(fragmetn);
+            Console.WriteLine("Sending a request from the source to another node");
+            node.Receive(fragment);
         }
 
-        /// <summary>
-        /// Счетчик всех созданных фрагментов
-        /// </summary>
+        // Счетчик всех созданных фрагментов
         private long FragmentCounter
         {
             get;
             set;
         }
 
-
-        /// <summary>
-        /// Передача управления источнику
-        /// </summary>
+        // Передача управления источнику
         public override void Activate()
         {
+            Console.WriteLine("Create a new demand");
             //Создаем требование
-            Fragment f = new Fragment(Info.GetCurrentTime(), FragmentCounter, new SignatureForFragment(null, 1, 0));
-            //Требование ссылается само на себя
-            f.Sigma.ParentFragment = f;
+            Fragment f = new Fragment(Info.GetCurrentTime(), 
+                FragmentCounter, null, 0);
             FragmentCounter++;
 
             //Время следующего события
@@ -89,9 +61,8 @@ namespace NetworkSimulator
             Route(f);
         }
 
-        /// <summary>
-        /// Случайная величина между (интервалы между требованиями) 
-        /// </summary>
+        // Случайная величина 
+        //(интервалы времени между поступлением требований) 
         protected RandomVariable ArrivalInterval
         {
             get;
@@ -99,22 +70,9 @@ namespace NetworkSimulator
         }
 
 
-        /// <summary>
-        /// Маршрутная строка только для смежных узлов (первый индекс передает смежный узел, второй и третий передают фрагменты)
-        /// </summary>
-        private double[,] RouteRow
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Инициализация источника требований
-        /// </summary>
-        /// <param name="r">Интервалы между поступлениями требований</param>
-        /// <param name="RouteRow">Строка для маршрутизации требований</param>
-        /// <param name="ID">Идентификатор узла</param>
-        public SourceNode(int ID, Random r, RandomVariable ArrivalInterval, Node[] Nodes, InfoNode Info, double[,] RouteRow)
+        // Инициализация источника требований
+        public SourceNode(int ID, Random r, RandomVariable ArrivalInterval,
+            Node[] Nodes, InfoNode Info)
         {
             //Передача параметров
             this.ID = ID;
@@ -122,7 +80,6 @@ namespace NetworkSimulator
             this.ArrivalInterval = ArrivalInterval;
             this.Nodes = Nodes;
             this.Info = Info;
-            this.RouteRow = RouteRow;
 
             //Первое поступление происходит в нулевой момент времени
             this.NextEventTime = 0;

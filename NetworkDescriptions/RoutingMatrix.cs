@@ -11,7 +11,7 @@ namespace NetworkDescriptions
     {
         private int[,,,] Theta;
 
-        //Маршрутная матрица 
+        //Маршрутная матрица (конструктор) 
         public RoutingMatrix(int ij, int kl)
         {
             Theta = new int[ij, ij, kl, kl];
@@ -27,37 +27,55 @@ namespace NetworkDescriptions
             set { Theta[i, j, k, l] = value; }
         }
 
-        //Строка матрицы передачи
-        public double[,] RoutingRow(int i, int j)
+        // матрицы передачи
+        public double[,] RoutingRow(int i, int k)
         {
-            double[,] row = new double[Dimention2, Dimention2];
-            for (int k = 0; k < Dimention2; k++)
+            double[,] matrix = new double[Dimention2, Dimention1];
+            for (int l = 0; l < Dimention2; l++)
             {
-                for (int l = 0; l < Dimention2; l++)
+                for (int j = 0; j < Dimention1; j++)
                 {
-                    row[k, l] = Theta[i, j, k, l];
+                    matrix[l, j] = Theta[i, j, k, l];
                 }
             }
-
-            return row;
+            
+            return matrix;
         }
 
-        //Маршрутная матрица для фиксированного узла
-        public double[,,] RoutingMatrixForNode(int i)
+        //Строка передачи для источника
+        public double[] RoutingRowForSource(int i)
         {
-            double[,,] row = new double[Dimention1, Dimention2, Dimention2];
+            double[] row = new double[Dimention1];
             for (int j = 0; j < Dimention1; j++)
             {
                 for (int k = 0; k < Dimention2; k++)
                 {
                     for (int l = 0; l < Dimention2; l++)
                     {
-                        row[j, k, l] = Theta[i, j, k, l];
+                        row[j] = Theta[i, j, k, l];
                     }
                 }
             }
 
             return row;
+         }
+
+        //Маршрутная матрица для фиксированного узла
+        public double[,,] RoutingMatrixForNode(int i)
+        {
+            double[,,] matrix = new double[Dimention1, Dimention2, Dimention2];
+            for (int j = 0; j < Dimention1; j++)
+            {
+                for (int k = 0; k < Dimention2; k++)
+                {
+                    for (int l = 0; l < Dimention2; l++)
+                    {
+                        matrix[j, k, l] = Theta[i, j, k, l];
+                    }
+                }
+            }
+
+            return matrix;
         }
 
         //Заполение матрицы строкой из файла
