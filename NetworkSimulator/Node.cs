@@ -3,35 +3,30 @@ using System;
 
 namespace NetworkSimulator
 {
-    //Узел СеМО
+    // Узел СеМО
     public abstract class Node
     {
-        //Число поступивших фрагментов
+        // Число поступивших фрагментов
         public long NumberOfArrivedDemands { get; protected set; }
-        //Идентификатор узла
+        // Идентификатор узла
         public int ID { get; protected set; }
-        //Генератор случайных чисел
+        // Генератор случайных чисел
         public Random random;
-
-        //Узлы с которыми происходит обмен фрагментами
+        // Узлы с которыми происходит обмен фрагментами
         public Node[] Nodes { get; set; }
-
-        //Информационный узел
+        // Информационный узел
         public InfoNode Info { get; protected set; }
-
-        //Время активации узла
+        // Время активации узла
         public double NextEventTime { get; protected set; }
-        
-        //Получение фрагмента узлом
+
+        // Получение фрагмента узлом
         public abstract void Receive(Fragment fragment);
-        
-        //Отправляет фрагмент по сети обслуживания согласно маршрутизации
+        // Отправляет фрагмент по сети обслуживания 
+        // согласно маршрутизации
         public abstract void Route(Fragment fragment);
-
-        //Отправляет фрагмент в узел 
+        // Отправляет фрагмент в узел 
         public abstract void Send(Fragment fragment, Node node);
-
-        //Активация узла
+        // Активация узла
         public abstract void Activate();
     }
 }

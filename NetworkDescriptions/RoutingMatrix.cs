@@ -1,88 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace NetworkDescriptions
 {
-    //Маршрутная матрица для сети с делениеи слиянием требований
+    // Маршрутная матрица для сети с делениеи слиянием требований
     public class RoutingMatrix
     {
+        // Матрица для маршрутизации
+        // первый индекс - узел откуда идет передача фрагмента
+        // второй индекс - узел куда идет передача фрагмента
+        // третий индекс - тип фрагмента
+        // четвертый индекс - новый тип фрагмента
         private int[,,,] Theta;
 
-        //Маршрутная матрица (конструктор) 
+        // Маршрутная матрица (конструктор) 
         public RoutingMatrix(int ij, int kl)
         {
             Theta = new int[ij, ij, kl, kl];
         }
-
-        //Размерность матрицы (количество узлов в сети)
+        // Размерность матрицы (количество узлов в сети)
         public int Dimention1 { get { return Theta.GetLength(0); } }
         public int Dimention2 { get { return Theta.GetLength(2); } }
-
+        
         public int this[int i, int j, int k, int l]
         {
             get { return Theta[i, j, k, l]; }
             set { Theta[i, j, k, l] = value; }
         }
 
-        // матрицы передачи
-        public double[,] RoutingRow(int i, int k)
-        {
-            double[,] matrix = new double[Dimention2, Dimention1];
-            for (int l = 0; l < Dimention2; l++)
-            {
-                for (int j = 0; j < Dimention1; j++)
-                {
-                    matrix[l, j] = Theta[i, j, k, l];
-                }
-            }
-            
-            return matrix;
-        }
-
-        //Строка передачи для источника
-        public double[] RoutingRowForSource(int i)
-        {
-            double[] row = new double[Dimention1];
-            for (int j = 0; j < Dimention1; j++)
-            {
-                for (int k = 0; k < Dimention2; k++)
-                {
-                    for (int l = 0; l < Dimention2; l++)
-                    {
-                        row[j] = Theta[i, j, k, l];
-                    }
-                }
-            }
-
-            return row;
-         }
-
-        //Маршрутная матрица для фиксированного узла
-        public double[,,] RoutingMatrixForNode(int i)
-        {
-            double[,,] matrix = new double[Dimention1, Dimention2, Dimention2];
-            for (int j = 0; j < Dimention1; j++)
-            {
-                for (int k = 0; k < Dimention2; k++)
-                {
-                    for (int l = 0; l < Dimention2; l++)
-                    {
-                        matrix[j, k, l] = Theta[i, j, k, l];
-                    }
-                }
-            }
-
-            return matrix;
-        }
-
-        //Заполение матрицы строкой из файла
+        // Заполение матрицы строкой из файла
         public void FillingTheta(string line)
         {
             string[] data = line.Split(';');
-            Theta[int.Parse(data[0]), int.Parse(data[1]), int.Parse(data[2]), int.Parse(data[3])] = 1;
+            Theta[int.Parse(data[0]), int.Parse(data[1]), 
+                int.Parse(data[2]), int.Parse(data[3])] = 1;
         }
 
         public override string ToString()
@@ -100,7 +50,8 @@ namespace NetworkDescriptions
                         {
                             if (Theta[i, j, k, l] == 1)
                             {
-                                str.AppendLine($"Theta[{i}, {j}, {k}, {l}] = 1");
+                                str.AppendLine($"Theta" +
+                                    $"[{i}, {j}, {k}, {l}] = 1");
                             }
                         }
                     }

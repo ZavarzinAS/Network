@@ -1,4 +1,4 @@
-﻿namespace RandomVariables
+﻿namespace NetworkSimulator
 {
     class Demo
     {

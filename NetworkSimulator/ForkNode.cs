@@ -1,25 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RandomVariables;
+using NLog;
 
 namespace NetworkSimulator
 {
-    //Дивайдер
+    // Узел - Дивайдер
     public class ForkNode : Node
     {
-        //Идентификатор дивайдера
-        public int ForkNodeID { get; protected set; }
+        private static readonly Logger logger = 
+            LogManager.GetCurrentClassLogger();
 
+        // Массив типов фрагментов
         public int[] Kinds { get; set; }
-
-        public ForkNode(int id, int forkNodeID, Random random, 
+        // Коструктор
+        public ForkNode(int id, Random random, 
             Node[] nodes, InfoNode info, int[] Kinds)
         {
             ID = id;
-            ForkNodeID = forkNodeID;
             this.random = random;
             Nodes = nodes;
             Info = info;
@@ -29,48 +25,41 @@ namespace NetworkSimulator
 
             NextEventTime = double.PositiveInfinity;
         }
-
-        //Отправляет фрагмент в указанному узлу
+        // Отправляет фрагмент в указанному узлу
         public override void Send(Fragment fragment, Node node)
         {
-            Console.WriteLine("Id fragment -- {0}. " +
-                "Sends a fragment from the devider to the specified node", 
+            logger.Info("Id fragment -- {0}. " +
+                "Sends a fragment from the fork-node " +
+                "to the specified node", 
                 fragment.ID);
             node.Receive(fragment);
         }
-
-        //Распределяет фрагмент по узлам
+        // Распределяет фрагмент по узлам
         public override void Route(Fragment fragment)
         {
-            Console.WriteLine("Id fragment -- {0}. " +
-                "Sends a fragment to the specified node from the devider", 
+            logger.Info("Id fragment -- {0}. " +
+                "Sends a fragment to the specified node " +
+                "from the fork-node",
                 fragment.ID);
-            //Номер фрагмента начиная с единицы
-            int partIndex = 1;
             for (int j = 0; j < Nodes.Length; j++)
             {
-                Fragment part = new Fragment(fragment.TimeGeneration, 
+                Fragment part = new Fragment(fragment.TimeGeneration,
                     fragment.ID, fragment, Kinds[j]);
-                Console.WriteLine(fragment);
+                logger.Info(fragment);
                 Send(part, Nodes[j]);
-                partIndex++;
             }
         }
-
-
-        //Получение фрагмента из некого узла
+        // Получение фрагмента из некого узла
         public override void Receive(Fragment fragment)
         {
-            Console.WriteLine("Id fragment -- {0}. " +
-                "Receiving a fragment by the diver",
+            logger.Info("Id fragment -- {0}. " +
+                "Receiving a fragment by the fork-node",
                 fragment.ID);
             NumberOfArrivedDemands++;
             Route(fragment);
         }
-
-        //Активация дивайдера
+        // Активация дивайдера
         public override void Activate()
-        { } 
-        
+        { }
     }
 }

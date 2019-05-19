@@ -1,16 +1,15 @@
 ﻿namespace NetworkSimulator
 {
-    //Фрагмент в сети с делением и слиянием требований
+    // Фрагмент в сети с делением и слиянием требований
     public class Fragment : Demand
     {
-        //Сигнатура фрагмента
+        // Родительский фрагмент
         public Fragment ParentFragment { get; set; }
-
+        // Тип фрагмента
         public int Kind { get; set; }
-
-
-
-        public Fragment(double TimeGeneration, long ID, Fragment ParentFragment, int Kind)
+        // Констурктор
+        public Fragment(double TimeGeneration, long ID,
+            Fragment ParentFragment, int Kind)
         {
             this.TimeGeneration = TimeGeneration;
             this.ID = ID;
@@ -18,21 +17,22 @@
             this.ParentFragment = ParentFragment;
             NumberOfParts = 1;
         }
-
-        //Число частей на которое был поделен фрагмент
+        // Число частей на которое был поделен фрагмент
         public int NumberOfParts { get; set; }
-        //Время поступления
+        // Время поступления
         public double TimeArrivale { get; set; }
-        //Время начала обслуживания
+        // Время начала обслуживания
         public double TimeStartService { get; set; }
-        //Время завершения обслуживания
+        // Время завершения обслуживания
         public double TimeLeave { get; set; }
-        //Общее время пребывания в сети
+        // Общее время пребывания в сети
         public double TotalTime { get; set; }
 
         public override string ToString()
         {
-            string s = string.Format("ID = {0}, TimeGen = {1:f4}, Kind = {2}", ID, TimeGeneration, Kind);
+            string s = string.Format("ID = {0}, " +
+                "TimeGen = {1:f4}, Kind = {2}", ID, 
+                TimeGeneration, Kind);
             return s;
         }
     }

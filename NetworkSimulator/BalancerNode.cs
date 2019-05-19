@@ -1,30 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RandomVariables;
+﻿using System.Collections.Generic;
+using NLog;
 
 namespace NetworkSimulator
 {
+    // Узел СеМО. Отвечает за баланчировку
     public class BalancerNode : Node
-    { 
-        public List<ServiceNode> ServiceNodes { get; set; }
+    {
+        private static Logger logger = 
+            LogManager.GetCurrentClassLogger();
 
+        // Список базовых систем
+        public List<ServiceNode> ServiceNodes { get; set; }
+        // Конструктор балансировщика
         public BalancerNode(int id)
         {
             ID = id;
             ServiceNodes = new List<ServiceNode>();
             NextEventTime = double.PositiveInfinity;
-        }
 
-        //Добавляет узел к балансировщику
+            logger.Info("Node was created");
+        }
+        // Добавляет узел (базовую систему) к балансировщику
         public void AddServiceNode(ServiceNode serviceNode)
         {
             ServiceNodes.Add(serviceNode);
         }
-
-        //Возвращает узел с наименьшей длиной очереди
+        // Возвращает узел с наименьшей числом требований
         private ServiceNode PassNode()
         {          
             int min = int.MaxValue;
@@ -40,22 +41,23 @@ namespace NetworkSimulator
             }
             return ServiceNodes[i_min];
         }
-
+        // Активация узал
         public override void Activate()
-        {
-            //PassNode().Activate();
-        }
-
+        { }
+        // Получение фрагмента 
         public override void Receive(Fragment fragment)
         {
             PassNode().Receive(fragment);
         }
-
+        // Отправка фрагмента
         public override void Route(Fragment fragment)
         {
-            PassNode().Route(fragment);
+            Node node = PassNode();
+            logger.Info("Route fragment {0} " +
+                "to node with id = {}", fragment, node.ID);
+            node.Route(fragment);
         }
-
+        // Отправка фрагмента в указанный узел
         public override void Send(Fragment fragment, Node node)
         {
             PassNode().Receive(fragment);

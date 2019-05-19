@@ -1,40 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.IO;
 using System.Text;
-using System.Threading.Tasks;
-using System.IO;
 
 namespace NetworkDescriptions
 {
-    //Описание открытой экспоненциальной СеМО с делением и слиянием требований
-    //Пауссоновский входящий поток поток
-    //Дисциплина FCFS
-    //Одноприборные базовые системы
+    // Описание открытой экспоненциальной СеМО 
+    // с делением и слиянием требований
+    // Пауссоновский входящий поток поток
+    // Дисциплина FCFS
+    // Одноприборные базовые системы
     public class Description
     {
-        //Номер источника
+        // Номер источника
         public int N { get; set; }
-        //Массив балансировщиков 
+        // Массив балансировщиков 
         public int[] B { get; set; }
-        //Массив номеров интеграторов
+        // Массив номеров интеграторов
         public int[] J { get; set; }
-        //Массив номеров дивайдеров
+        // Массив номеров дивайдеров
         public int[] F { get; set; }
-        //Массив базовых систем
+        // Массив базовых систем
         public int[] S { get; set; }
-        //Матрица перехода
+        // Матрица перехода
         public RoutingMatrix Theta { get; set; }
-        //Интенсивность входящего потока
+        // Интенсивность входящего потока
         public double Lambda0 { get; set; }
-        //Массив интенсивностей обслуживания
+        // Массив интенсивностей обслуживания
         public double[] mu { get; set; }
-        //Число обслуживающих устройст в базовых системах
+        // Число обслуживающих устройст в базовых системах
         public int[] kappa { get; set; }
 
-        public Description(int[] B, int[] F, int[] J, double[] mu, double Lambda0, int[] S, int[] kappa, RoutingMatrix Theta)
+        public Description(int[] B, int[] F, int[] J, 
+            double[] mu, double Lambda0, int[] S, 
+            int[] kappa, RoutingMatrix Theta)
         {
-            N = 0;//Номер источника (всегда 0)
+            N = 0;// Номер источника (всегда 0)
             this.B = B;
             this.F = F;
             this.J = J;
@@ -43,23 +42,23 @@ namespace NetworkDescriptions
             this.S = S;
             this.kappa = kappa;
             this.Theta = Theta;
-            //место для матрицы перехода
+            
         }
 
-        //Создает открытую сеть с деление и слиянием требований, считывая данные из файла
+        // Создает открытую сеть с деление и слиянием требований, 
+        // считывая данные из файла
         public Description(string FileName)
         {
             using (StreamReader file = new StreamReader(FileName))
             {
-                //Балансировщики
+                // Балансировщики
                 var temp = file.ReadLine().Split(';');
                 B = new int[temp.Length];
                 for (int i = 0; i < temp.Length; i++)
                 {
                     B[i] = int.Parse(temp[i]);
                 }
-
-                //Дивайдеры ForkNode
+                // Дивайдеры ForkNode
                 temp = file.ReadLine().Split(';');
                 if (temp[0].Length != 0)
                 {
@@ -73,8 +72,7 @@ namespace NetworkDescriptions
                 {
                     F = new int[0];
                 }
-
-                //Интеграторы JoinNode
+                // Интеграторы JoinNode
                 temp = file.ReadLine().Split(';');
                 if (temp[0].Length != 0)
                 {
@@ -88,37 +86,35 @@ namespace NetworkDescriptions
                 {
                     J = new int[0];
                 }
-
-                //Параметры СМО. Интенсивность обслуживания
+                // Параметры СМО. Интенсивность обслуживания
                 temp = file.ReadLine().Split(';');
                 mu = new double[B.Length];
                 for (int i = 0; i < mu.Length; i++)
                 {
                     mu[i] = double.Parse(temp[i]);
                 }
-
-                //Базовые системы
+                // Базовые системы
                 temp = file.ReadLine().Split(';');
                 S = new int[B.Length];
                 for (int i = 0; i < S.Length; i++)
                 {
                     S[i] = int.Parse(temp[i]);
                 }
-
-                //Число обслуживающих устройств в каждом типе (множестве базовых систем)
+                // Число обслуживающих устройств в каждом типе 
+                // (множестве базовых систем)
                 temp = file.ReadLine().Split(';');
                 kappa = new int[S.Length];
                 for (int i = 0; i < kappa.Length; i++)
                 {
                     kappa[i] = int.Parse(temp[i]);
                 }
-
-                //Интенсивность входящего потока
+                // Интенсивность входящего потока
                 Lambda0 = double.Parse(file.ReadLine());
-
-                //Матрица перехода
+                // Матрица перехода
                 string str;
-                Theta = new RoutingMatrix(B.Length + F.Length + J.Length + 1, F.Length + J.Length + 2);
+                Theta = new RoutingMatrix(B.Length + 
+                    F.Length + J.Length + 1, F.Length + 
+                    J.Length + 2);
                 while ((str = file.ReadLine()) != null)
                 {
                     Theta.FillingTheta(str);
@@ -153,7 +149,8 @@ namespace NetworkDescriptions
             }
             str.AppendLine();
 
-            //Интесивности обслуживания для одного прибора в системе
+            // Интесивности обслуживания для одного прибора
+            // в системе
             str.AppendLine("mu = ");
             foreach (var item in mu)
             {
@@ -161,7 +158,7 @@ namespace NetworkDescriptions
             }
             str.AppendLine();
 
-            //Число обслуживающих приборов в системах
+            // Число базовых систем
             str.AppendLine("S = ");
             foreach (var item in S)
             {
@@ -169,10 +166,9 @@ namespace NetworkDescriptions
             }
             str.AppendLine();
 
-            //Интенсивность входящего потока
+            // Интенсивность входящего потока
             str.AppendLine("lambda0 = ");
             str.AppendFormat("{0:f2}", Lambda0);
-
 
             str.AppendLine();
             str.AppendLine(Theta.ToString());

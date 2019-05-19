@@ -3,17 +3,16 @@ using RandomVariables;
 
 namespace NetworkSimulator
 {
+    // Узел - Информационный узел
     public class InfoNode : Node
     {
         //Отображает текущее время
         private double CurrentTime;
-
         //Задает текущее время
         public void SetCurrentTime(double time)
         {
             CurrentTime = time;
         }
-
         //Возвращает текущее время
         public double GetCurrentTime()
         {
