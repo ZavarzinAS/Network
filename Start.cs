@@ -237,7 +237,7 @@ namespace Network_Simulation
             NetworkModel model = new NetworkModel(nodes, Info, random);
 
             // Запускаем моделирование
-            model.Run(10000);
+            model.Run(1000);
             // Анализ сети
             double tau = 0;
             model.Analysis(out tau);
@@ -333,7 +333,7 @@ namespace Network_Simulation
             // Создание модели СеМО
             NetworkModel net = new NetworkModel(nodes, Info, new Random());
             // Запуск моделирования
-            net.Run(10000);
+            net.Run(1000);
             // Анализ сети
             double tau = 0;
             net.Analysis(out tau);
@@ -404,7 +404,7 @@ namespace Network_Simulation
             // Создание модели СеМО
             NetworkModel net = new NetworkModel(nodes, Info, r);
             // Запуск моделирования
-            net.Run(10000);
+            net.Run(1000);
             // Анализ сети
             double tau = 0;
             net.Analysis(out tau);
@@ -428,7 +428,7 @@ namespace Network_Simulation
             Console.ReadKey();
 
             Console.WriteLine("Start simulation");
-            StartModel3();
+            StartModel();
         }
     }
 }
